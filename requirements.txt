@@ -1,0 +1,7 @@
+pandas
+matplotlib
+seaborn
+PyQt6
+pyqtgraph
+scikit-learn
+numpy

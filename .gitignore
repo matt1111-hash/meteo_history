@@ -1,0 +1,22 @@
+# Virtuális környezetek
+*venv*/
+venv/
+env/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*.class
+
+# Környezeti változók
+.env
+*.env
+
+# IDE fájlok
+.idea/
+.vscode/
+
+# Ideiglenes fájlok
+*.log
+*.bak
+

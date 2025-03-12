@@ -1,0 +1,8 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Energia Monitor
+Comment=Energiafogyasztás grafikus megjelenítése
+Exec=/home/tibor/Projects/python_projects/energia_monitoring/start_energy_viewer.sh
+Icon=utilities-system-monitor
+Terminal=false
