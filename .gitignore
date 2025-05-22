@@ -20,3 +20,12 @@ __pycache__/
 *.log
 *.bak
 
+__pycache__/
+*.pyc
+*.pyo
+*.log
+venv/
+.env
+.DS_Store
+
+

@@ -5,8 +5,8 @@ from watchdog.events import FileSystemEventHandler
 import time
 
 # A mappák elérési útvonalai
-input_folder = "/home/tibor/Projects/python_projects/energia_monitoring/CSV-eredeti"
-output_folder = "/home/tibor/Projects/python_projects/energia_monitoring/CSV-normalis"
+input_folder = "/home/tibor/PythonProjects/energia_monitoring/CSV-eredeti"
+output_folder = "/home/tibor/PythonProjects/energia_monitoring/CSV-normalis"
 output_file = os.path.join(output_folder, "energia_adatok.csv")
 
 # A fájlok figyelése

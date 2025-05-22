@@ -1,12 +1,28 @@
 #!/bin/bash
-# Virtuális környezet aktiválása
-source /home/tibor/PythonProjects/energia_monitoring/venv/bin/activate
+cd "$(dirname "$0")"
 
-# Váltás a projekt könyvtárba
-cd /home/tibor/PythonProjects/energia_monitoring
+# CUDA kizárása Qt futás közben
+export LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu
+export QT_QPA_PLATFORM_PLUGIN_PATH=/usr/lib/x86_64-linux-gnu/qt6/plugins/platforms
 
-# CSV monitor indítása a háttérben
-python src/csv_normalizer.py &
+# Venv aktiválása
+if [ -f "./venv/bin/activate" ]; then
+    echo "🔄 Virtuális környezet aktiválása..."
+    source ./venv/bin/activate
+else
+    echo "⚠️ Nincs venv! Telepítsd: python3 -m venv venv && pip install -r requirements.txt"
+    exit 1
+fi
 
-# Qt alkalmazás indítása
-python qt_energy_viewer.py
+# CSV normalizáló lefuttatása
+echo "🧹 CSV normalizálás indítása..."
+python3 src/csv_normalizer.py
+
+# (Opcionális) CSV figyelő háttérben indítása
+# echo "👀 CSV figyelő indítása háttérben..."
+# python3 src/csv_monitor_safe.py &
+
+# Energy Viewer indítása
+echo "🚀 Energiafigyelő indítása..."
+python3 qt_energy_viewer.py
+
