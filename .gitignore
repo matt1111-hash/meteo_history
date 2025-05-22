@@ -1,25 +1,3 @@
-# Virtuális környezetek
-*venv*/
-venv/
-env/
-
-# Python cache
-__pycache__/
-*.py[cod]
-*.class
-
-# Környezeti változók
-.env
-*.env
-
-# IDE fájlok
-.idea/
-.vscode/
-
-# Ideiglenes fájlok
-*.log
-*.bak
-
 __pycache__/
 *.pyc
 *.pyo
@@ -27,5 +5,4 @@ __pycache__/
 venv/
 .env
 .DS_Store
-
-
+output/\nexport/\n__pycache__/

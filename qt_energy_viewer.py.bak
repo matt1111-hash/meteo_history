@@ -1,0 +1,118 @@
+import sys
+import pandas as pd
+import os
+from datetime import datetime, timedelta
+from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, 
+                            QHBoxLayout, QLabel, QComboBox)
+from PyQt6.QtCore import Qt
+import pyqtgraph as pg
+
+class TimeAxisItem(pg.AxisItem):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.period = 'Napi'
+        
+    def tickStrings(self, values, scale, spacing):
+        strings = []
+        for value in values:
+            try:
+                date = datetime.fromtimestamp(value)
+                if self.period == 'Napi':
+                    strings.append(date.strftime('%Y-%m-%d'))
+                elif self.period == 'Heti':
+                    strings.append(f"{date.strftime('%Y-%m-%d')}")
+                else:
+                    strings.append(date.strftime('%Y-%m'))
+            except:
+                strings.append('')
+        return strings
+
+class EnergyViewer(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle('Energia Fogyasztás Elemző')
+        self.setGeometry(100, 100, 1200, 800)
+        
+        # Központi widget és layout beállítása
+        central_widget = QWidget()
+        self.setCentralWidget(central_widget)
+        layout = QVBoxLayout(central_widget)
+        
+        # Felső panel a vezérlőknek
+        control_panel = QWidget()
+        control_layout = QHBoxLayout(control_panel)
+        
+        # Időszak választó
+        self.period_selector = QComboBox()
+        self.period_selector.addItems(['Napi', 'Heti', 'Havi'])
+        self.period_selector.currentTextChanged.connect(self.update_graph)
+        control_layout.addWidget(QLabel('Időszak:'))
+        control_layout.addWidget(self.period_selector)
+        control_layout.addStretch()
+        
+        layout.addWidget(control_panel)
+        
+        # Grafikon widget létrehozása egyedi X tengellyel
+        self.time_axis = TimeAxisItem(orientation='bottom')
+        self.graph_widget = pg.PlotWidget(axisItems={'bottom': self.time_axis})
+        self.graph_widget.setBackground('white')
+        self.graph_widget.showGrid(x=True, y=True)
+        layout.addWidget(self.graph_widget)
+        
+        # Statisztika panel
+        stats_panel = QWidget()
+        stats_layout = QHBoxLayout(stats_panel)
+        self.stats_label = QLabel()
+        self.stats_label.setAlignment(Qt.AlignmentFlag.AlignLeft)
+        stats_layout.addWidget(self.stats_label)
+        layout.addWidget(stats_panel)
+        
+        # Adatok betöltése
+        self.load_data()
+        self.update_graph()
+
+    def load_data(self):
+        csv_dir = '/home/tibor/csv_projekt/CSV-normalis'
+        all_data = []
+        
+        for filename in os.listdir(csv_dir):
+            if filename.endswith('.csv'):
+                file_path = os.path.join(csv_dir, filename)
+                df = pd.read_csv(file_path)
+                date_str = filename.split('-')[0:3]
+                date = '-'.join(date_str)
+                daily_consumption = df['Hatásos_érték_[kWh]'].sum()
+                
+                df['Kezdõ_dátum'] = pd.to_datetime(df['Kezdõ_dátum'])
+                hourly_consumption = df.groupby(df['Kezdõ_dátum'].dt.hour)['Hatásos_érték_[kWh]'].mean()
+                
+                all_data.append({
+                    'Dátum': date,
+                    'Fogyasztás': daily_consumption,
+                    'Óránkénti': hourly_consumption
+                })
+        
+        self.df = pd.DataFrame([(d['Dátum'], d['Fogyasztás']) for d in all_data],
+                             columns=['Dátum', 'Fogyasztás'])
+        self.df['Dátum'] = pd.to_datetime(self.df['Dátum'])
+        self.df = self.df.sort_values('Dátum')
+
+    def aggregate_data(self, period):
+        if period == 'Napi':
+            return self.df
+        elif period == 'Heti':
+            return self.df.groupby(pd.Grouper(key='Dátum', freq='W')).agg({
+                'Fogyasztás': 'sum'
+            }).reset_index()
+        else:  # Havi
+            return self.df.groupby(pd.Grouper(key='Dátum', freq='M')).agg({
+                'Fogyasztás': 'sum'
+            }).reset_index()
+
+
+if __name__ == '__main__':
+    app = QApplication(sys.argv)
+    app.setStyle('Fusion')
+    window = EnergyViewer()
+    window.show()
+    sys.exit(app.exec())
